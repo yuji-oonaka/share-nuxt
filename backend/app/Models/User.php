@@ -16,9 +16,10 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+    // ↓↓↓ この$fillableプロパティを追加または編集 ↓↓↓
     protected $fillable = [
-        'firebase_uid',
         'name',
+        'firebase_uid',
     ];
 
     /**
@@ -27,32 +28,16 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
-        // パスワードは使わないので空
+        'remember_token',
     ];
 
     /**
-     * The attributes that should be cast.
+     * Get the attributes that should be cast.
      *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        // email_verified_at は使わないので空
-    ];
-
-    /**
-     * ユーザーは多くの投稿を持つ
-     */
-
-    public function posts(): HasMany
+    protected function casts(): array
     {
-        return $this->hasMany(Post::class);
-    }
-
-    /**
-     * ユーザーは多くのコメントを持つ
-     */
-    public function comments(): HasMany
-    {
-        return $this->hasMany(Comment::class);
+        return [];
     }
 }

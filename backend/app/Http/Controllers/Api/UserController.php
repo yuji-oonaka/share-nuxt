@@ -3,47 +3,38 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * ユーザー情報をDBに登録する
      */
     public function store(Request $request)
     {
-        //
-    }
+        try {
+            // バリデーションを実行
+            $validated = $request->validate([
+                'firebase_uid' => 'required|string|unique:users,firebase_uid',
+                'name' => 'required|string|max:20',
+            ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+            $user = User::create($validated);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+            // 成功したら、作成されたユーザー情報を201ステータスで返す
+            return response()->json($user, 201);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        } catch (ValidationException $e) {
+            // バリデーションエラーの場合は422を返す
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            // その他のエラーログを出力
+            Log::error($e->getMessage());
+            // エラーレスポンスを返す
+            return response()->json(['message' => 'ユーザーの作成に失敗しました。'], 500);
+        }
     }
 }

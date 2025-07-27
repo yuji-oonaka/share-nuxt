@@ -19,4 +19,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/users', [UserController::class, 'store']); // ◀◀◀ この行を追記
+Route::post('/users', [UserController::class, 'store']);
+Route::post('/posts', [PostController::class, 'store']);
