@@ -11,6 +11,16 @@ use Illuminate\Validation\ValidationException;
 class PostController extends Controller
 {
     /**
+     * 投稿の一覧を取得する
+     */
+    public function index() // ◀◀◀ このメソッドを追加
+    {
+        // ユーザー情報も一緒に、新しい順で全件取得
+        $posts = Post::with('user')->latest()->get();
+        return response()->json($posts);
+    }
+
+    /**
      * 新しい投稿を保存する
      */
     public function store(Request $request)
