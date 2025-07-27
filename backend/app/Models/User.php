@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany; // ◀◀◀ 追加
 
 class User extends Authenticatable
 {
@@ -16,7 +17,6 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    // ↓↓↓ この$fillableプロパティを追加または編集 ↓↓↓
     protected $fillable = [
         'name',
         'firebase_uid',
@@ -39,5 +39,13 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [];
+    }
+
+    /**
+     * このユーザーが所有する投稿を取得
+     */
+    public function posts(): HasMany // ◀◀◀ このメソッドを追加
+    {
+        return $this->hasMany(Post::class);
     }
 }
