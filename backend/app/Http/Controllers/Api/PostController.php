@@ -13,10 +13,10 @@ class PostController extends Controller
     /**
      * 投稿の一覧を取得する
      */
-    public function index() // ◀◀◀ このメソッドを追加
+    public function index()
     {
         // ユーザー情報も一緒に、新しい順で全件取得
-        $posts = Post::with('user', 'likes')->withCount('likes')->latest()->get();
+        $posts = Post::with('user', 'likes')->withCount('likes', 'comments')->latest()->get();
         return response()->json($posts);
     }
 
@@ -47,7 +47,7 @@ class PostController extends Controller
         }
     }
 
-    public function destroy(Post $post) // ◀◀◀ このメソッドを追加
+    public function destroy(Post $post)
     {
         // 認可チェック（PostPolicy@deleteが呼ばれる）
         $this->authorize('delete', $post);
