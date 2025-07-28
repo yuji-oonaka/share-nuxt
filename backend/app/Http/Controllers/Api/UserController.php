@@ -37,4 +37,9 @@ class UserController extends Controller
             return response()->json(['message' => 'ユーザーの作成に失敗しました。'], 500);
         }
     }
+
+    public function me(Request $request)
+    {
+        return response()->json($request->user());
+    }
 }

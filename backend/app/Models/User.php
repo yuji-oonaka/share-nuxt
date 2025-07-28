@@ -44,8 +44,13 @@ class User extends Authenticatable
     /**
      * このユーザーが所有する投稿を取得
      */
-    public function posts(): HasMany // ◀◀◀ このメソッドを追加
+    public function posts(): HasMany
     {
         return $this->hasMany(Post::class);
+    }
+
+    public function likes(): HasMany
+    {
+        return $this->hasMany(Like::class);
     }
 }

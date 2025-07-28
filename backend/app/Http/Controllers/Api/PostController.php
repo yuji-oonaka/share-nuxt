@@ -16,7 +16,7 @@ class PostController extends Controller
     public function index() // ◀◀◀ このメソッドを追加
     {
         // ユーザー情報も一緒に、新しい順で全件取得
-        $posts = Post::with('user')->latest()->get();
+        $posts = Post::with('user', 'likes')->withCount('likes')->latest()->get();
         return response()->json($posts);
     }
 
@@ -45,5 +45,16 @@ class PostController extends Controller
             Log::error($e->getMessage());
             return response()->json(['message' => '投稿に失敗しました。'], 500);
         }
+    }
+
+    public function destroy(Post $post) // ◀◀◀ このメソッドを追加
+    {
+        // 認可チェック（PostPolicy@deleteが呼ばれる）
+        $this->authorize('delete', $post);
+
+        $post->delete();
+
+        // 成功したら204 No Contentを返す
+        return response()->noContent();
     }
 }
