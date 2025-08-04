@@ -36,80 +36,52 @@
 
 [▲ 目次に戻る](https://www.google.com/search?q=%23%E7%9B%AE%E6%AC%A1)
 
------
 
-## 環境構築
+# 環境構築
 
-### 1\. プロジェクトのクローン
+### 前提条件
 
-まず、このリポジトリ全体をクローンし、ディレクトリに移動します。
+環境構築を始める前に、お使いのPCに以下のソフトウェアがインストールされていることを確認してください。
 
-```bash
-git clone git@github.com:yuji-oonaka/my-sns-app.git
-cd my-sns-app
-```
+  - Git
+  - Docker Desktop
+  - Node.js (v18以上)
 
-### 2\. バックエンド (Laravel) の構築
+> **Windowsユーザーの方へ**
+> `setup.sh`スクリプトを実行するには、Git BashやWSL (Windows Subsystem for Linux) のようなUnix系のターミナル環境が必要です。
 
-次に、`backend`ディレクトリに移動して、バックエンドの環境を構築します。
+#### 実行手順
 
-```bash
-cd backend
-```
+1.  **リポジトリのクローン**
 
-> **Note**
-> これ以降の`sail`で始まるコマンドは、すべてこの`backend`ディレクトリ内で実行してください。
-> (`sail`は`./vendor/bin/sail`のエイリアス（別名）です)
+    ```bash
+    git clone <あなたのリポジトリURL>
+    cd <リポジトリのディレクトリ>
+    ```
 
-```bash
-# 環境変数の設定
-cp .env.example .env
+2.  **セットアップスクリプトの実行**
+    以下のコマンドで、バックエンドとフロントエンドの環境構築を一括で実行します。このスクリプトにより、`.env`ファイルなども自動でコピーされます。
 
-# .envファイルを編集し、DB接続情報とFirebaseの秘密鍵パスを設定
-# FIREBASE_CREDENTIALS=/var/www/html/path/to/your/firebase_credentials.json
+    ```bash
+    # スクリプトに実行権限を付与
+    chmod +x setup.sh
 
-# Dockerコンテナを起動
-sail up -d
+    # スクリプトを実行
+    ./setup.sh
+    ```
 
-# 依存パッケージをインストール
-sail composer install
+3.  **環境変数の編集**
+    スクリプトによって自動生成された`backend/.env`と`frontend/.env.local`の2つのファイルを開き、**Firebaseの各種キー**など、あなたの環境に合わせた設定値を追記・編集してください。
 
-# アプリケーションキーを生成
-sail artisan key:generate
+4.  **フロントエンド開発サーバーの起動**
+    環境構築が完了したら、`frontend`ディレクトリに移動して開発サーバーを起動します。
 
-# データベースを構築し、テストデータを投入
-sail artisan migrate:fresh --seed
-```
+    ```bash
+    cd frontend
+    npm run dev
+    ```
 
-> バックエンドは `http://localhost` で起動します。
-
-### 3\. フロントエンド (Next.js) の構築
-
-最後に、`frontend`ディレクトリに移動して、フロントエンドの環境を構築します。
-
-```bash
-# ルートディレクトリに戻り、frontendディレクトリに移動
-cd ../frontend
-```
-
-> **Note**
-> これ以降の`npm`で始まるコマンドは、すべてこの`frontend`ディレクトリ内で実行してください。
-
-```bash
-# 依存パッケージをインストール
-npm install
-
-# 環境変数の設定
-cp .env.local.example .env.local
-
-# .env.localファイルを編集し、Firebase設定とバックエンドAPIのURLを設定
-# NEXT_PUBLIC_API_BASE_URL="http://localhost/api"
-
-# 開発サーバーを起動
-npm run dev
-```
-
-> フロントエンドは `http://localhost:3000` で起動します。
+> フロントエンドは `http://localhost:3000` で、バックエンドは `http://localhost` で起動しています。
 
 [▲ 目次に戻る](https://www.google.com/search?q=%23%E7%9B%AE%E6%AC%A1)
 
