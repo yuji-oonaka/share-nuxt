@@ -55,8 +55,8 @@
 1.  **リポジトリのクローン**
 
     ```bash
-    git clone <あなたのリポジトリURL>
-    cd <リポジトリのディレクトリ>
+    git clone git@github.com:yuji-oonaka/my-sns-app.git
+    cd my-sns-app
     ```
 
 2.  **セットアップスクリプトの実行**
