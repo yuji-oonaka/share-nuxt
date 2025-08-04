@@ -47,24 +47,6 @@ services:
                 - '-p${DB_PASSWORD}'
             retries: 3
             timeout: 5s
-
-    # frontendサービスをここに追加
-    frontend:
-        build:
-            context: ../frontend
-            dockerfile: Dockerfile
-        container_name: my-sns-app-frontend
-        volumes:
-            - ../frontend:/app
-            - /app/node_modules
-        ports:
-            - "3000:3000"
-        networks: # frontendもsailネットワークに接続
-            - sail
-        depends_on:
-            - laravel.test
-        tty: true
-
 # networksとvolumesはトップレベル（インデントなし）に配置
 networks:
     sail:
