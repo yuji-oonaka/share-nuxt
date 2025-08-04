@@ -45,8 +45,8 @@
 まず、このリポジトリ全体をクローンします。
 
 ```bash
-git clone <あなたのリポジトリURL>
-cd <リポジトリのディレクトリ>
+git clone git@github.com:yuji-oonaka/my-sns-app.git
+cd my-sns-app
 ```
 
 ### 2\. バックエンド (Laravel) の構築
