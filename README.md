@@ -40,9 +40,9 @@
 
 ## 環境構築
 
-### 1\. プロジェクトのクローンと移動
+### 1\. プロジェクトのクローン
 
-まず、このリポジトリ全体をクローンします。
+まず、このリポジトリ全体をクローンし、ディレクトリに移動します。
 
 ```bash
 git clone git@github.com:yuji-oonaka/my-sns-app.git
@@ -51,12 +51,17 @@ cd my-sns-app
 
 ### 2\. バックエンド (Laravel) の構築
 
-次に、バックエンド用の設定と起動を行います。
+次に、`backend`ディレクトリに移動して、バックエンドの環境を構築します。
 
 ```bash
-# backendディレクトリに移動
 cd backend
+```
 
+> **Note**
+> これ以降の`sail`で始まるコマンドは、すべてこの`backend`ディレクトリ内で実行してください。
+> (`sail`は`./vendor/bin/sail`のエイリアス（別名）です)
+
+```bash
 # 環境変数の設定
 cp .env.example .env
 
@@ -64,28 +69,33 @@ cp .env.example .env
 # FIREBASE_CREDENTIALS=/var/www/html/path/to/your/firebase_credentials.json
 
 # Dockerコンテナを起動
-./vendor/bin/sail up -d
+sail up -d
 
 # 依存パッケージをインストール
-./vendor/bin/sail composer install
+sail composer install
 
 # アプリケーションキーを生成
-./vendor/bin/sail artisan key:generate
+sail artisan key:generate
 
 # データベースを構築し、テストデータを投入
-./vendor/bin/sail artisan migrate:fresh --seed
+sail artisan migrate:fresh --seed
 ```
 
 > バックエンドは `http://localhost` で起動します。
 
 ### 3\. フロントエンド (Next.js) の構築
 
-最後に、フロントエンド用の設定と起動を行います。
+最後に、`frontend`ディレクトリに移動して、フロントエンドの環境を構築します。
 
 ```bash
 # ルートディレクトリに戻り、frontendディレクトリに移動
 cd ../frontend
+```
 
+> **Note**
+> これ以降の`npm`で始まるコマンドは、すべてこの`frontend`ディレクトリ内で実行してください。
+
+```bash
 # 依存パッケージをインストール
 npm install
 
@@ -120,19 +130,21 @@ npm run dev
 
 ### バックエンドテスト (PHPUnit)
 
+`backend`ディレクトリ内で以下のコマンドを実行します。
+
 ```bash
-# backendディレクトリで実行
-./vendor/bin/sail artisan test
+sail artisan test
 ```
 
 ### フロントエンドテスト (Jest)
 
+`frontend`ディレクトリ内で以下のコマンドを実行します。
+
 ```bash
-# frontendディレクトリで実行
 npm test
 ```
 
-[▲ 目-次に戻る](https://www.google.com/search?q=%23%E7%9B%AE%E6%AC%A1)
+[▲ 目次に戻る](https://www.google.com/search?q=%23%E7%9B%AE%E6%AC%A1)
 
 -----
 
