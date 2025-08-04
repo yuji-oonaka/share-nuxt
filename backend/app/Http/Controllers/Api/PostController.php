@@ -57,4 +57,11 @@ class PostController extends Controller
         // 成功したら204 No Contentを返す
         return response()->noContent();
     }
+
+    public function show(Post $post) // ◀◀◀ このメソッドを追加
+    {
+        // 投稿に紐づく全ての情報をEager Loadして返す
+        $post->load(['user', 'likes', 'comments.user']);
+        return response()->json($post);
+    }
 }

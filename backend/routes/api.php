@@ -13,6 +13,7 @@ Route::post('/users', [UserController::class, 'store']);
 // 投稿一覧取得（認証不要）
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{post}/comments', [CommentController::class, 'index']);
+Route::get('/posts/{post}', [PostController::class, 'show']);
 
 // 認証が必要なルート
 Route::middleware(FirebaseAuthenticate::class)->group(function () {

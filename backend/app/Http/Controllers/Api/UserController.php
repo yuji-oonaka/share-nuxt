@@ -5,39 +5,46 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
     /**
-     * ユーザー情報をDBに登録する
+     * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
         try {
-            // バリデーションを実行
+            // Add 'email' to validation and increase name limit
             $validated = $request->validate([
                 'firebase_uid' => 'required|string|unique:users,firebase_uid',
-                'name' => 'required|string|max:20',
+                'name'         => 'required|string|max:50', // Increase limit
+                'email'        => 'required|string|email|unique:users,email',
             ]);
+
+
+            $validated['password'] = Hash::make(Str::random(20));
+            $validated['remember_token'] = Str::random(10);
+
 
             $user = User::create($validated);
 
-            // 成功したら、作成されたユーザー情報を201ステータスで返す
             return response()->json($user, 201);
 
         } catch (ValidationException $e) {
-            // バリデーションエラーの場合は422を返す
             return response()->json(['errors' => $e->errors()], 422);
         } catch (\Exception $e) {
-            // その他のエラーログを出力
             Log::error($e->getMessage());
-            // エラーレスポンスを返す
-            return response()->json(['message' => 'ユーザーの作成に失敗しました。'], 500);
+            return response()->json(['message' => 'Failed to create user.'], 500);
         }
     }
 
+    /**
+     * Return the authenticated user.
+     */
     public function me(Request $request)
     {
         return response()->json($request->user());
