@@ -9,20 +9,31 @@ echo "🚀 環境構築を開始します..."
 echo "--- 1. バックエンド (Laravel) を構築中... ---"
 cd backend
 
-echo "sailコンテナを起動します..."
-./vendor/bin/sail up -d
-
-echo ".envファイルをコピーします..."
-cp .env.example .env
+echo ".envファイルを作成します..."
+if [ -f .env.example ]; then
+    cp .env.example .env
+fi
 
 echo "Composerパッケージをインストールします..."
-./vendor/bin/sail composer install
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v "$(pwd)":/var/www/html \
+    -w /var/www/html \
+    laravelsail/php83-composer:latest \
+    composer install --ignore-platform-reqs
+
+echo "sailコンテナをビルドして起動します..."
+./vendor/bin/sail up -d --build
+
+echo "データベースコンテナの起動を待ちます..."
+sleep 15 # 15秒待機
 
 echo "アプリケーションキーを生成します..."
 ./vendor/bin/sail artisan key:generate
 
 echo "データベースを構築し、シーディングを実行します..."
-./vendor/bin/sail artisan migrate:fresh --seed
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail artisan db:seed
 
 echo "--- バックエンドの構築が完了しました。 ---"
 
@@ -34,10 +45,14 @@ cd ../frontend
 echo "npmパッケージをインストールします..."
 npm install
 
-echo ".env.localファイルをコピーします..."
-cp .env.local.example .env.local
+echo ".env.localファイルを作成します..."
+if [ -f .env.local.example ]; then
+    cp .env.local.example .env.local
+fi
 
 echo "--- フロントエンドの構築が完了しました。 ---"
 
 echo "✅ 全ての環境構築が完了しました！"
-echo "フロントエンドを起動するには、frontendディレクトリで 'npm run dev' を実行してください。"
+echo "--- 次のステップ ---"
+echo "1. backend/.env と frontend/.env.local に、Firebaseのキーなどを設定してください。"
+echo "2. frontendディレクトリで 'npm run dev' を実行して、開発を開始してください。"
