@@ -6,14 +6,15 @@ import { getAnalytics, isSupported } from "firebase/analytics";
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
+// frontend/app/lib/firebase.ts
+
 const firebaseConfig = {
-  apiKey: "AIzaSyAovJZHHsPcu_8Y7OkFoGuH8eMJvTmGLbI",
-  authDomain: "twitter-clone-f3f7b.firebaseapp.com",
-  projectId: "twitter-clone-f3f7b",
-  storageBucket: "twitter-clone-f3f7b.firebasestorage.app",
-  messagingSenderId: "228902542207",
-  appId: "1:228902542207:web:30e93eb1824f4961e4984a",
-  measurementId: "G-F3KEW83NNW"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 
