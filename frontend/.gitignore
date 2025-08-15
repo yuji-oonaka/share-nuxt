@@ -30,8 +30,6 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# ... (他の設定はそのまま) ...
-
 # env files (can opt-in for committing if needed)
 .env*
 # ただし、.env.local.exampleだけは無視しない（例外ルール）
