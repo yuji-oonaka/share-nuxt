@@ -33,9 +33,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
       if (user) {
+        // 新規登録直後のトークンの問題を解決するため、トークンを強制的にリフレッシュ
+        await user.getIdToken(true);
         // Firebaseにログインしている場合、バックエンドにユーザー情報を問い合わせる
         try {
-          const response = await apiClient.get('/me');
+          const response = await apiClient.get("/me");
           setAppUser(response.data);
         } catch (error) {
           console.error("DBユーザー情報の取得に失敗:", error);
