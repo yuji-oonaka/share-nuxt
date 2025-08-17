@@ -1,7 +1,0 @@
-@import "tailwindcss";
-
-/*
-  グローバルなCSS変数を定義する場合はここに記述しますが、
-  今回はTailwindで直接色を指定するため、
-  以前の :root や body の設定は不要です。
-*/

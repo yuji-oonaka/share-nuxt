@@ -1,40 +1,20 @@
 {
-  "name": "frontend",
-  "version": "0.1.0",
+  "name": "nuxt-app",
+  "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "test": "jest"
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "axios": "^1.10.0",
-    "firebase": "^12.0.0",
-    "next": "15.4.2",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "react-hot-toast": "^2.5.2"
-  },
-  "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
-    "@testing-library/jest-dom": "^6.6.4",
-    "@testing-library/react": "^16.3.0",
-    "@types/jest": "^30.0.0",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@types/whatwg-fetch": "^0.0.33",
-    "eslint": "^9",
-    "eslint-config-next": "15.4.2",
-    "jest": "^30.0.5",
-    "jest-environment-jsdom": "^30.0.5",
-    "tailwindcss": "^4",
-    "ts-jest": "^29.4.1",
-    "ts-node": "^10.9.2",
-    "typescript": "^5",
-    "whatwg-fetch": "^3.6.20"
+    "@nuxt/eslint": "^1.8.0",
+    "@nuxt/icon": "^2.0.0",
+    "eslint": "^9.33.0",
+    "nuxt": "^4.0.3",
+    "vue": "^3.5.18",
+    "vue-router": "^4.5.1"
   }
 }
