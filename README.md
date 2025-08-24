@@ -103,7 +103,7 @@ share-nuxt/
 #### ステップ2：リポジトリのクローンと移動
 
 ```bash
-git clone <リポジトリのURL> share-nuxt
+git clone git@github.com:yuji-oonaka/share-nuxt.git share-nuxt
 cd share-nuxt
 ```
 
