@@ -100,10 +100,10 @@ share-nuxt/
 
 -----
 
-#### ステップ2：リポジトリのクローンと移動
+#### ステップ2：リポジトリのクローン
 
 ```bash
-git clone git@github.com:yuji-oonaka/share-nuxt.git share-nuxt
+git clone git@github.com:yuji-oonaka/share-nuxt.git
 cd share-nuxt
 ```
 
