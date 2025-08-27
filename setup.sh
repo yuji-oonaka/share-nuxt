@@ -38,21 +38,23 @@ echo "データベースを構築し、シーディングを実行します..."
 echo "--- バックエンドの構築が完了しました。 ---"
 
 
-# --- フロントエンドの構築 ---
-echo "--- 2. フロントエンド (Next.js) を構築中... ---"
+# --- フロントエンドの構築 (Nuxt.js用に修正) ---
+echo "--- 2. フロントエンド (Nuxt.js) を構築中... ---"
 cd ../frontend
 
 echo "npmパッケージをインストールします..."
 npm install
 
-echo ".env.localファイルを作成します..."
-if [ -f .env.local.example ]; then
-    cp .env.local.example .env.local
+echo ".envファイルを作成します..."
+# .env.exampleが存在する場合のみコピーする
+if [ -f .env.example ]; then
+    cp .env.example .env # .env.local から .env に変更
 fi
 
 echo "--- フロントエンドの構築が完了しました。 ---"
 
 echo "✅ 全ての環境構築が完了しました！"
 echo "--- 次のステップ ---"
-echo "1. backend/.env と frontend/.env.local に、Firebaseのキーなどを設定してください。"
+# .env.local から .env に変更
+echo "1. backend/.env と frontend/.env に、Firebaseのキーなどを設定してください。"
 echo "2. frontendディレクトリで 'npm run dev' を実行して、開発を開始してください。"

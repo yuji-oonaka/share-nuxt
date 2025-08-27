@@ -13,10 +13,27 @@ class PostController extends Controller
     /**
      * 投稿の一覧を取得する
      */
-    public function index()
+    public function index(Request $request)
     {
-        // ユーザー情報も一緒に、新しい順で全件取得
-        $posts = Post::with('user', 'likes')->withCount('likes', 'comments')->latest()->get();
+        $user = $request->user(); // ログインユーザー取得（未ログインならnull）
+
+        $posts = Post::with('user', 'likes')
+            ->withCount('likes', 'comments')
+            ->latest()
+            ->get();
+
+        // 各投稿ごとにフラグを追加
+        $posts->transform(function ($post) use ($user) {
+            $post->is_commented_by_current_user = false;
+            if ($user) {
+                // この投稿にログインユーザーのコメントがあるか
+                $post->is_commented_by_current_user = $post->comments()
+                    ->where('user_id', $user->id)
+                    ->exists();
+            }
+            return $post;
+        });
+
         return response()->json($posts);
     }
 
@@ -36,6 +53,8 @@ class PostController extends Controller
             $post = $request->user()->posts()->create([
                 'content' => $validated['content'],
             ]);
+
+            $post->load('user');
 
             return response()->json($post, 201);
 
@@ -58,10 +77,20 @@ class PostController extends Controller
         return response()->noContent();
     }
 
-    public function show(Post $post) // ◀◀◀ このメソッドを追加
+    public function show(Request $request, Post $post)
     {
-        // 投稿に紐づく全ての情報をEager Loadして返す
+        $user = $request->user();
+
         $post->load(['user', 'likes', 'comments.user']);
+
+        // フラグ追加
+        $post->is_commented_by_current_user = false;
+        if ($user) {
+            $post->is_commented_by_current_user = $post->comments()
+                ->where('user_id', $user->id)
+                ->exists();
+        }
+
         return response()->json($post);
     }
 }
