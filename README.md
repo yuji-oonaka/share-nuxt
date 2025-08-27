@@ -177,50 +177,6 @@ npm test
 
 ## ER図（参考）
 
-本アプリケーションの主要なデータベース構成です。
-
-```
-erDiagram
-    USERS ||--o{ POSTS : "has many"
-    USERS ||--o{ COMMENTS : "has many"
-    USERS ||--o{ LIKES : "has many"
-
-    POSTS ||--o{ COMMENTS : "has many"
-    POSTS ||--o{ LIKES : "has many"
-
-    USERS {
-        string id "Firebase UID (PK)"
-        string name
-        string email
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    POSTS {
-        bigint id PK
-        string user_id FK
-        text content
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    COMMENTS {
-        bigint id PK
-        string user_id FK
-        bigint post_id FK
-        text content
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    LIKES {
-        bigint id PK
-        string user_id FK
-        bigint post_id FK
-        timestamp created_at
-    }
-```
-
 | テーブル名 | 概要 |
 |:-----------|:-----|
 | **users**  | ユーザー情報（FirebaseのUIDを含む） |
@@ -229,6 +185,5 @@ erDiagram
 | **likes**    | 投稿への「いいね」 |
 
 [▲ 目次に戻る](#目次)
-```
 
 ***
