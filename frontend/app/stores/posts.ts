@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import type { Post } from "~/app/types";
+import { useToast } from "vue-toastification";
 
 export const usePostsStore = defineStore("posts", {
   state: () => ({
@@ -21,7 +22,7 @@ export const usePostsStore = defineStore("posts", {
     // 新規投稿を作成
     async createPost(content: string) {
       if (!content.trim()) return;
-
+      const toast = useToast();
       try {
         const newPost = await useApiFetch<Post>("/posts", {
           method: "POST",
@@ -36,18 +37,20 @@ export const usePostsStore = defineStore("posts", {
           newPost.comments_count = newPost.comments_count ?? 0;
 
           this.posts.unshift(newPost);
+          toast.success("新規投稿しました"); 
         }
       } catch (error) {
         console.error("投稿に失敗しました", error);
-        alert("投稿に失敗しました。");
+        toast.error("投稿に失敗しました"); 
       }
     },
 
     // いいね切り替え
     async toggleLike(postId: number) {
+      const toast = useToast();
       const userStore = useUserStore();
       if (!userStore.user) {
-        alert("いいねするにはログインが必要です。");
+        toast.error("いいねするにはログインが必要です。");
         return;
       }
 
@@ -85,19 +88,20 @@ export const usePostsStore = defineStore("posts", {
         }
       } catch (error) {
         console.error("いいね処理に失敗しました", error);
-        alert("いいねに失敗しました。");
+        toast.error("いいねに失敗しました。");
       }
     },
 
     // コメント追加
     async addComment(postId: number, content: string) {
       if (!content.trim()) return;
-
+      const toast = useToast();
       try {
         await useApiFetch(`/posts/${postId}/comments`, {
           method: "POST",
           body: { content },
         });
+        toast.success("コメントしました");
 
         // 最新コメントを反映するために投稿を再取得して更新
         const updatedPost = await useApiFetch<Post>(`/posts/${postId}`);
@@ -107,16 +111,18 @@ export const usePostsStore = defineStore("posts", {
         }
       } catch (error) {
         console.error("コメントの投稿に失敗しました", error);
-        alert("コメントの投稿に失敗しました。");
+        toast.error("コメントの投稿に失敗しました。");
       }
     },
 
     // コメント削除
     async deleteComment(postId: number, commentId: number) {
+      const toast = useToast();
       try {
         await useApiFetch(`/comments/${commentId}`, {
           method: "DELETE",
         });
+        toast.success("コメントを削除しました");
 
         // サーバーから最新の投稿データを取得して反映
         const updatedPost = await useApiFetch<Post>(`/posts/${postId}`);
@@ -126,7 +132,7 @@ export const usePostsStore = defineStore("posts", {
         }
       } catch (error) {
         console.error("コメントの削除に失敗しました", error);
-        alert("コメントの削除に失敗しました。");
+        toast.error("コメントの削除に失敗しました。");
       }
     },
   },

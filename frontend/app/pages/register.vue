@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { Form, Field, ErrorMessage } from 'vee-validate';
-import { ref } from 'vue';
+import { useToast } from 'vue-toastification';
+
 const { signUp } = useAuth();
 const router = useRouter();
 const config = useRuntimeConfig();
-const errorMessage = ref('');
+const toast = useToast();
+const userStore = useUserStore(); // 👈 この行を追加
 
 useHead({
-  title: '登録', // このページのタイトルを「ホーム」に設定
+  title: '登録',
 });
 
 definePageMeta({
@@ -15,12 +17,13 @@ definePageMeta({
     middleware: 'auth'
 });
 
-// handleRegisterがフォームの値(values)を受け取るように変更
 const handleRegister = async (values: any) => {
     try {
+        // 1. Firebase Authへの登録
         const userCredential = await signUp(values.email, values.password);
 
-        await $fetch(`${config.public.apiBaseUrl}/users`, {
+        // 2. バックエンドDBへの登録 (戻り値を受け取る)
+        const newUser = await $fetch(`${config.public.apiBaseUrl}/users`, {
             method: 'POST',
             body: {
                 name: values.username,
@@ -29,12 +32,20 @@ const handleRegister = async (values: any) => {
             }
         });
 
-        alert('登録が完了しました。ログインしてください。');
-        router.push('/login');
+        // 3. Piniaストアを直接更新する
+        if (newUser) {
+            userStore.setUser(newUser);
+            userStore.setAuthReady(true); 
+        }
+
+        // 4. ストア更新後、ホーム画面へ移動する
+        await router.push('/');
+        
+        toast.success('登録が完了し、ログインしました');
 
     } catch (error: any) {
         console.error('Registration failed:', error);
-        errorMessage.value = '登録に失敗しました。入力内容を確認するか、既に使用されているメールアドレスです。';
+        toast.error('登録に失敗しました。既に使用されているメールアドレスの可能性があります。');
     }
 };
 </script>
@@ -43,7 +54,6 @@ const handleRegister = async (values: any) => {
     <div class="bg-white text-black rounded-lg shadow-xl p-8 w-full max-w-sm">
         <h2 class="text-2xl font-bold text-center mb-6">新規登録</h2>
         <Form @submit="handleRegister">
-            <p v-if="errorMessage" class="text-red-500 text-center mb-4">{{ errorMessage }}</p>
 
             <div class="mb-4">
                 <label for="username" class="block mb-2 text-sm font-medium">ユーザーネーム</label>
@@ -67,7 +77,7 @@ const handleRegister = async (values: any) => {
 
             <div class="mb-6">
                 <label for="password" class="block mb-2 text-sm font-medium">パスワード</label>
-                <Field name="password" rules="required" v-slot="{ field, errors }">
+                <Field name="password" rules="required|min:6" v-slot="{ field, errors }">
                     <input v-bind="field" type="password" id="password"
                         class="w-full p-3 border rounded-lg focus:ring-purple-500 focus:border-purple-500"
                         :class="{ 'border-red-500': errors.length > 0 }" />
