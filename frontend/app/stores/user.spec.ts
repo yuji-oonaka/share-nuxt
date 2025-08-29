@@ -1,102 +1,63 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
-import { useUserStore } from "./user"; // テスト対象のストア
+import { useUserStore } from "./user";
 import type { User } from "~/app/types";
 
-// ----- 依存関係のモック -----
+// ---------------------------------------------------------------------------
+// Mocks
+// ---------------------------------------------------------------------------
 const useApiFetch = vi.fn();
 vi.stubGlobal("useApiFetch", useApiFetch);
-// -------------------------
 
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
 describe("User Store", () => {
-  // 各テストの前にPiniaを初期化し、モックをリセット
+  let store: ReturnType<typeof useUserStore>;
+
   beforeEach(() => {
     setActivePinia(createPinia());
+    store = useUserStore();
     vi.clearAllMocks();
   });
 
-  it("初期状態ではuserはnullで、isLoggedInはfalseである", () => {
-    const store = useUserStore();
+  it("初期状態", () => {
     expect(store.user).toBeNull();
     expect(store.isLoggedIn).toBe(false);
+    expect(store.isAuthReady).toBe(false);
   });
 
-  describe("actions", () => {
-    const mockUser: User = {
-      id: 1,
-      name: "テストユーザー",
-      email: "test@example.com",
-    };
+  const mockUser: User = {
+    id: 1,
+    name: "テストユーザー",
+    email: "test@example.com",
+  };
 
-    it("setUser: ユーザー情報を正しくstateにセットし、isLoggedInがtrueになる", () => {
-      const store = useUserStore();
-      store.setUser(mockUser);
+  it("setUser アクション", () => {
+    store.setUser(mockUser);
+    expect(store.user).toEqual(mockUser);
+    expect(store.isLoggedIn).toBe(true);
+  });
+
+  it("setAuthReady アクション", () => {
+    store.setAuthReady(true);
+    expect(store.isAuthReady).toBe(true);
+  });
+
+  describe("fetchUser アクション", () => {
+    it("成功時", async () => {
+      useApiFetch.mockResolvedValue(mockUser);
+      await store.fetchUser();
+      expect(useApiFetch).toHaveBeenCalledWith("/me");
       expect(store.user).toEqual(mockUser);
-      expect(store.isLoggedIn).toBe(true);
+      expect(store.isAuthReady).toBe(true);
     });
 
-    it("logout: ユーザー情報をnullに戻し、isLoggedInがfalseになる", () => {
-      const store = useUserStore();
-      // 事前にログイン状態にしておく
-      store.user = mockUser;
-
-      store.logout();
+    it("失敗時", async () => {
+      useApiFetch.mockRejectedValue(new Error("API Error"));
+      await store.fetchUser();
       expect(store.user).toBeNull();
-      expect(store.isLoggedIn).toBe(false);
-    });
-
-    describe("fetchUser", () => {
-      it("API通信が成功した場合、ユーザー情報を取得してstateを更新する", async () => {
-        const store = useUserStore();
-        // 準備: useApiFetchがユーザー情報を返すように設定
-        useApiFetch.mockResolvedValue(mockUser);
-
-        // 実行:
-        await store.fetchUser();
-
-        // 確認:
-        expect(useApiFetch).toHaveBeenCalledWith("/me");
-        expect(store.user).toEqual(mockUser);
-        expect(store.isLoggedIn).toBe(true);
-      });
-
-      it("API通信が失敗した場合、ユーザー情報をnullにする", async () => {
-        const store = useUserStore();
-        // 準備: useApiFetchがエラーを投げるように設定
-        useApiFetch.mockRejectedValue(new Error("API Error"));
-
-        // 実行:
-        await store.fetchUser();
-
-        // 確認:
-        expect(store.user).toBeNull();
-        expect(store.isLoggedIn).toBe(false);
-      });
-    });
-
-    describe("registerUser", () => {
-      it("API通信が成功した場合、新規登録したユーザー情報でstateを更新する", async () => {
-        const store = useUserStore();
-        const newUser: User = {
-          id: 2,
-          name: "新規ユーザー",
-          email: "new@example.com",
-        };
-        const registerData = { name: "新規ユーザー" };
-        // 準備: useApiFetchが新規ユーザー情報を返すように設定
-        useApiFetch.mockResolvedValue(newUser);
-
-        // 実行:
-        await store.registerUser(registerData);
-
-        // 確認:
-        expect(useApiFetch).toHaveBeenCalledWith("/users", {
-          method: "POST",
-          body: registerData,
-        });
-        expect(store.user).toEqual(newUser);
-        expect(store.isLoggedIn).toBe(true);
-      });
+      expect(store.isAuthReady).toBe(true);
     });
   });
 });

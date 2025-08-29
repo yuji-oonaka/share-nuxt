@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { Form, Field, ErrorMessage } from 'vee-validate';
+import { useToast } from 'vue-toastification';
+
 
 useHead({
   title: 'ログイン', // このページのタイトルを「ホーム」に設定
@@ -11,6 +12,7 @@ definePageMeta({
     middleware: 'auth'
 });
 
+const toast = useToast();
 const { logIn } = useAuth();
 const userStore = useUserStore();
 const router = useRouter();
@@ -21,10 +23,11 @@ const handleLogin = async (values: any) => {
     try {
         await logIn(values.email, values.password);
         await userStore.fetchUser();
+        toast.success('ログインしました'); // 👈 成功トースト
         router.push('/');
     } catch (error: any) {
         console.error('Login failed:', error);
-        errorMessage.value = 'メールアドレスまたはパスワードが違います。';
+        toast.error('メールアドレスまたはパスワードが違います'); // 👈 エラートースト
     }
 };
 </script>
@@ -33,8 +36,6 @@ const handleLogin = async (values: any) => {
     <div class="bg-white text-black rounded-lg shadow-xl p-8 w-full max-w-sm">
         <h2 class="text-2xl font-bold text-center mb-6">ログイン</h2>
         <Form @submit="handleLogin">
-            <p v-if="errorMessage" class="text-red-500 text-center mb-4">{{ errorMessage }}</p>
-
             <div class="mb-4">
                 <label for="email" class="block mb-2 text-sm font-medium">メールアドレス</label>
                 <Field name="email" rules="required|email" v-slot="{ field, errors }">
