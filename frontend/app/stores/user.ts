@@ -4,11 +4,16 @@ import type { User } from "~/app/types";
 export const useUserStore = defineStore("user", {
   state: () => ({
     user: null as User | null,
+    isAuthReady: false, // 👈 状態フラグを追加 (初期値はfalse)
   }),
   getters: {
     isLoggedIn: (state) => !!state.user,
   },
   actions: {
+    setAuthReady(status: boolean) {
+      // 👈 このアクションを追加
+      this.isAuthReady = status;
+    },
     setUser(newUser: User | null) {
       this.user = newUser;
     },
@@ -19,22 +24,9 @@ export const useUserStore = defineStore("user", {
       } catch (error) {
         this.setUser(null);
         console.error("Failed to fetch user", error);
+      } finally {
+        this.setAuthReady(true); // 👈 処理の最後に必ずフラグをtrueにする
       }
-    },
-    async registerUser(userData: { name: string }) {
-      try {
-        const user = await useApiFetch<User>("/users", {
-          method: "POST",
-          body: userData,
-        });
-        this.setUser(user);
-      } catch (error) {
-        console.error("ユーザー登録に失敗しました", error);
-        alert("ユーザー登録に失敗しました。");
-      }
-    },
-    logout() {
-      this.user = null;
     },
   },
 });

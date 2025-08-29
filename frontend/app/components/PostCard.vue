@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { Post } from "~/app/types";
+import { useToast } from "vue-toastification";
 
 const props = defineProps<{
   post: Post;
@@ -8,6 +9,7 @@ const props = defineProps<{
 
 const userStore = useUserStore();
 const postsStore = usePostsStore();
+const toast = useToast();
 
 // 🔹 ログイン中のユーザーがいいね済みかどうか
 const isLikedByCurrentUser = computed(() => {
@@ -25,22 +27,20 @@ const isCommentedByCurrentUser = computed(() => {
 
 // 🔹 投稿削除処理（store 経由）
 async function deletePost() {
-  if (!confirm("本当にこの投稿を削除しますか？")) return;
-
-  try {
-    await useApiFetch(`/posts/${props.post.id}`, {
-      method: "DELETE",
-    });
-
-    // store からも削除
-    postsStore.posts = postsStore.posts.filter(
-      (p) => p.id !== props.post.id
-    );
-
-    alert("投稿を削除しました");
-  } catch (error) {
-    console.error("投稿の削除に失敗しました", error);
-    alert("投稿の削除に失敗しました。");
+  if (confirm("本当にこの投稿を削除しますか？")) {
+    try {
+      await useApiFetch(`/posts/${props.post.id}`, {
+        method: "DELETE",
+      });
+      postsStore.posts = postsStore.posts.filter(
+        (p) => p.id !== props.post.id
+      );
+      useToast().success("投稿を削除しました");
+      navigateTo("/");
+    } catch (error) {
+      console.error("投稿の削除に失敗しました", error);
+      useToast().error("投稿の削除に失敗しました。");
+    }
   }
 }
 </script>

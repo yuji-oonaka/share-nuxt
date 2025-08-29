@@ -21,7 +21,7 @@ class UserController extends Controller
             // Add 'email' to validation and increase name limit
             $validated = $request->validate([
                 'firebase_uid' => 'required|string|unique:users,firebase_uid',
-                'name'         => 'required|string|max:50', // Increase limit
+                'name'         => 'required|string|max:20', // Increase limit
                 'email'        => 'required|string|email|unique:users,email',
             ]);
 

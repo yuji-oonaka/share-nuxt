@@ -1,26 +1,40 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { mount, RouterLinkStub } from "@vue/test-utils";
-
+import { mount, flushPromises, RouterLinkStub } from "@vue/test-utils";
 import Sidebar from "./Sidebar.vue";
+import { defineRule } from "vee-validate";
+import { required, max } from "@vee-validate/rules";
 
-// このコンポーネントで使われるすべての自動インポート関数をモックします
+// ---------------------------------------------------------------------------
+// Mocks (モック) の設定
+// ---------------------------------------------------------------------------
+
+// VeeValidateのルールをテスト用に定義
+defineRule("required", required);
+defineRule("max", max);
+
+// モック関数を定義
+const mockToast = { success: vi.fn(), error: vi.fn() };
 const mockLogOut = vi.fn();
 const mockSetUser = vi.fn();
-const mockCreatePost = vi.fn();
+const mockCreatePost = vi.fn().mockResolvedValue({});
 const mockRouterPush = vi.fn();
 
-const useAuth = vi.fn(() => ({ logOut: mockLogOut }));
-const useUserStore = vi.fn(() => ({ setUser: mockSetUser }));
-const usePostsStore = vi.fn(() => ({ createPost: mockCreatePost }));
-const useRouter = vi.fn(() => ({ push: mockRouterPush }));
+// ★★★ useToastだけをvi.mockで指定 ★★★
+vi.mock("vue-toastification", () => ({
+  useToast: () => mockToast,
+}));
 
-vi.stubGlobal("useAuth", useAuth);
-vi.stubGlobal("useUserStore", useUserStore);
-vi.stubGlobal("usePostsStore", usePostsStore);
-vi.stubGlobal("useRouter", useRouter);
+// ★★★ Nuxtの自動インポート関数はvi.stubGlobalでモック ★★★
+vi.stubGlobal("useAuth", vi.fn(() => ({ logOut: mockLogOut })));
+vi.stubGlobal("useUserStore", vi.fn(() => ({ setUser: mockSetUser })));
+vi.stubGlobal("usePostsStore", vi.fn(() => ({ createPost: mockCreatePost })));
+vi.stubGlobal("useRouter", vi.fn(() => ({ push: mockRouterPush })));
+
+// ---------------------------------------------------------------------------
+// Tests (テスト) の記述
+// ---------------------------------------------------------------------------
 
 describe("Sidebar.vue", () => {
-  // 各テストの前に、すべてのモックの呼び出し履歴をリセットします
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -31,35 +45,27 @@ describe("Sidebar.vue", () => {
         stubs: { NuxtLink: RouterLinkStub },
       },
     });
-
-    // 重要な文言が表示されているかを確認
     expect(wrapper.text()).toContain("ホーム");
     expect(wrapper.text()).toContain("ログアウト");
     expect(wrapper.text()).toContain("シェアする");
-    // テキストエリアが存在するかを確認
     expect(wrapper.find("textarea").exists()).toBe(true);
   });
 
   it("ログアウトボタンをクリックすると、ログアウト処理が実行され、ログインページに遷移する", async () => {
-    // alertが呼ばれたことを確認するために、偽のalertを用意します
-    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
-
     const wrapper = mount(Sidebar, {
       global: {
         stubs: { NuxtLink: RouterLinkStub },
       },
     });
 
-    // ログアウトボタンを探してクリックします
-    const logoutButton = wrapper
-      .findAll("button")
-      .find((btn) => btn.text().includes("ログアウト"));
+    const logoutButton = wrapper.findAll("button").find((btn) => btn.text().includes("ログアウト"));
     await logoutButton?.trigger("click");
+    await flushPromises();
 
-    // 期待される関数が正しく呼ばれたかを確認します
+    // 検証
     expect(mockLogOut).toHaveBeenCalled();
     expect(mockSetUser).toHaveBeenCalledWith(null);
-    expect(alertSpy).toHaveBeenCalledWith("ログアウトしました。");
+    expect(mockToast.success).toHaveBeenCalledWith("ログアウトしました");
     expect(mockRouterPush).toHaveBeenCalledWith("/login");
   });
 
@@ -69,20 +75,14 @@ describe("Sidebar.vue", () => {
         stubs: { NuxtLink: RouterLinkStub },
       },
     });
-
     const testContent = "新しい投稿のテストです";
-
-    // 1. テキストエリアに文字を入力します
     const textarea = wrapper.find("textarea");
     await textarea.setValue(testContent);
+    await wrapper.find("form").trigger("submit.prevent");
+    await flushPromises();
 
-    // 2. フォームを送信します
-    await wrapper.find("form").trigger("submit");
-
-    // 3. 結果を確認します
-    // postsStoreのcreatePostが正しい内容で呼ばれたか
+    // 結果を確認
     expect(mockCreatePost).toHaveBeenCalledWith(testContent);
-    // テキストエリアが空になったか
     expect((textarea.element as HTMLTextAreaElement).value).toBe("");
   });
 });
