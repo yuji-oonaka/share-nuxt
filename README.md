@@ -175,7 +175,10 @@ npm test
 
 [▲ 目次に戻る](#目次)
 
-## ER図（参考）
+## ER図
+
+<img width="661" height="571" alt="share drawio" src="https://github.com/user-attachments/assets/1ff205f0-5729-4193-98f6-c1db04039c28" />
+
 
 | テーブル名 | 概要 |
 |:-----------|:-----|
