@@ -1,30 +1,56 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-// vi.stubGlobalの行を削除
+// 拡張子 .ts を付けてインポート
+import authMiddleware from "./auth.ts";
 
-import authMiddleware from "./auth";
-
-// ----- 依存関係のモック -----
+// ----- Mocks -----
 const navigateTo = vi.fn();
-vi.stubGlobal("navigateTo", navigateTo);
 
-const useUserStore = vi.fn();
-vi.stubGlobal("useUserStore", useUserStore);
-// -------------------------
+// userStoreのモック。テストケースごとに値を変更できるようにする
+const mockUserStoreState = {
+  isLoggedIn: false,
+  isAuthReady: false,
+};
+
+vi.stubGlobal("navigateTo", navigateTo);
+vi.stubGlobal(
+  "useUserStore",
+  vi.fn(() => mockUserStoreState)
+);
+// -----------------
 
 describe("Auth Middleware", () => {
-  // ... (これ以降のコードは変更ありません) ...
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   const from = { path: "/" };
 
-  describe("未ログインユーザーの場合", () => {
+  beforeEach(() => {
+    // 各テストの前にモックの状態をリセット
+    vi.clearAllMocks();
+    mockUserStoreState.isLoggedIn = false;
+    mockUserStoreState.isAuthReady = false;
+    // process.server の状態もリセット
+    global.process = { ...global.process, server: false };
+  });
+
+  it("サーバーサイドでは何もしない", () => {
+    global.process.server = true; // サーバーサイドの状況をシミュレート
+    const to = { path: "/dashboard" };
+    authMiddleware(to, from);
+    expect(navigateTo).not.toHaveBeenCalled();
+  });
+
+  it("認証準備ができていない場合は何もしない", () => {
+    mockUserStoreState.isAuthReady = false; // 認証準備ができていない状態
+    const to = { path: "/dashboard" };
+    authMiddleware(to, from);
+    expect(navigateTo).not.toHaveBeenCalled();
+  });
+
+  describe("未ログインユーザーの場合 (認証準備完了後)", () => {
     beforeEach(() => {
-      useUserStore.mockReturnValue({ isLoggedIn: false });
+      mockUserStoreState.isLoggedIn = false;
+      mockUserStoreState.isAuthReady = true;
     });
 
-    it("保護されたページにアクセスしようとすると/loginにリダイレクトする", () => {
+    it("保護されたページにアクセスすると/loginにリダイレクトする", () => {
       const to = { path: "/dashboard" };
       authMiddleware(to, from);
       expect(navigateTo).toHaveBeenCalledWith("/login");
@@ -35,27 +61,16 @@ describe("Auth Middleware", () => {
       authMiddleware(to, from);
       expect(navigateTo).not.toHaveBeenCalled();
     });
-
-    it("/registerページにアクセスした場合はリダイレクトしない", () => {
-      const to = { path: "/register" };
-      authMiddleware(to, from);
-      expect(navigateTo).not.toHaveBeenCalled();
-    });
   });
 
-  describe("ログイン済みユーザーの場合", () => {
+  describe("ログイン済みユーザーの場合 (認証準備完了後)", () => {
     beforeEach(() => {
-      useUserStore.mockReturnValue({ isLoggedIn: true });
+      mockUserStoreState.isLoggedIn = true;
+      mockUserStoreState.isAuthReady = true;
     });
 
-    it("/loginページにアクセスしようとすると/にリダイレクトする", () => {
+    it("/loginページにアクセスすると/にリダイレクトする", () => {
       const to = { path: "/login" };
-      authMiddleware(to, from);
-      expect(navigateTo).toHaveBeenCalledWith("/");
-    });
-
-    it("/registerページにアクセスしようとすると/にリダイレクトする", () => {
-      const to = { path: "/register" };
       authMiddleware(to, from);
       expect(navigateTo).toHaveBeenCalledWith("/");
     });

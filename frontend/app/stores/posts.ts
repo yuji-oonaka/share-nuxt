@@ -37,11 +37,11 @@ export const usePostsStore = defineStore("posts", {
           newPost.comments_count = newPost.comments_count ?? 0;
 
           this.posts.unshift(newPost);
-          toast.success("新規投稿しました"); 
+          toast.success("新規投稿しました");
         }
       } catch (error) {
         console.error("投稿に失敗しました", error);
-        toast.error("投稿に失敗しました"); 
+        toast.error("投稿に失敗しました");
       }
     },
 
@@ -97,17 +97,24 @@ export const usePostsStore = defineStore("posts", {
       if (!content.trim()) return;
       const toast = useToast();
       try {
+        // APIへの送信は変更なし
         await useApiFetch(`/posts/${postId}/comments`, {
           method: "POST",
           body: { content },
         });
         toast.success("コメントしました");
 
-        // 最新コメントを反映するために投稿を再取得して更新
+        // データを更新
         const updatedPost = await useApiFetch<Post>(`/posts/${postId}`);
         const index = this.posts.findIndex((p) => p.id === postId);
         if (updatedPost && index !== -1) {
-          this.posts[index] = updatedPost;
+          // ▼▼▼ ここを修正 ▼▼▼
+          const existingPost = this.posts[index];
+          this.posts[index] = {
+            ...existingPost, // 既存のデータ（いいね情報など）を保持
+            ...updatedPost, // サーバーからの最新データ（新しいコメントなど）で上書き
+          };
+          // ▲▲▲ ここまで修正 ▲▲▲
         }
       } catch (error) {
         console.error("コメントの投稿に失敗しました", error);
