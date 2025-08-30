@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// newComment は VeeValidate が管理するため ref は不要
 import { computed, onMounted } from "vue";
 import type { Post } from "~/app/types";
 import { Form, Field, ErrorMessage } from 'vee-validate';
@@ -14,33 +13,26 @@ const userStore = useUserStore();
 const toast = useToast();
 const postId = Number(route.params.id);
 
-// 🔹 store から投稿を直接参照
+// 🔹 store から投稿を直接参照（リアルタイム更新用）
 const post = computed<Post | undefined>(() =>
-  postsStore.posts.find((p) => p.id === postId)
+  postsStore.posts.find(p => p.id === postId)
 );
-
-// 🔹 ログイン中ユーザーがいいね済みか
-const isLikedByCurrentUser = computed(() => {
-  if (!userStore.user || !post.value?.likes) return false;
-  return post.value.likes.some(like => like.user_id === userStore.user!.id);
-});
 
 // 🔹 投稿詳細を取得（初回ロード）
 const fetchPost = async () => {
   try {
-    const fetchedPost = await useApiFetch<Post>(`/posts/${postId}`, {
-      cache: "no-cache",
-    });
+    const fetchedPost = await useApiFetch<Post>(`/posts/${postId}`, { cache: "no-cache" });
     if (!fetchedPost) return;
 
     const index = postsStore.posts.findIndex(p => p.id === postId);
-
     if (index !== -1) {
       const existing = postsStore.posts[index];
       postsStore.posts[index] = {
         ...fetchedPost,
-        likes: existing.likes,
-        likes_count: existing.likes_count,
+        likes: existing.likes ?? fetchedPost.likes,
+        likes_count: existing.likes_count ?? fetchedPost.likes_count,
+        comments: existing.comments ?? fetchedPost.comments,
+        comments_count: existing.comments_count ?? fetchedPost.comments_count,
       };
     } else {
       postsStore.posts.push(fetchedPost);
@@ -58,20 +50,12 @@ const reversedComments = computed(() => {
   return [...post.value.comments].reverse();
 });
 
-// 🔹 コメント送信 (VeeValidateから値を受け取る形に変更)
+// 🔹 コメント送信
 const handleCommentSubmit = async (values: { comment: string }, { resetForm }: any) => {
   if (!post.value) return;
-  // values.comment に入力内容が入っています
   await postsStore.addComment(post.value.id, values.comment);
-  // VeeValidateの関数でフォームをリセットします
   resetForm();
-  await fetchPost(); // 最新のコメントを反映
-};
-
-// 🔹 いいね切り替え
-const handleToggleLike = async () => {
-  if (!post.value) return;
-  await postsStore.toggleLike(post.value.id);
+  await fetchPost();
 };
 
 // 🔹 投稿削除
@@ -93,22 +77,12 @@ const handleDeletePost = async () => {
 <template>
   <div>
     <div v-if="post">
-      <div>
-        <h1 class="text-xl font-bold text-white p-4 border-b border-gray-700">コメント</h1>
-        
-        <PostCard :post="post" />
+      <h1 class="text-xl font-bold text-white p-4 border-b border-gray-700">コメント</h1>
+      <!-- store のリアルオブジェクトをそのまま渡す -->
+      <PostCard :post="post" />
 
-        <div class="p-4 text-white border-b border-gray-700">
-            </div>
-      </div>
-
-      <div>
-        <CommentCard
-          v-for="comment in reversedComments"
-          :key="comment.id"
-          :comment="comment"
-          :postId="post.id"
-        />
+      <div v-for="comment in reversedComments" :key="comment.id">
+        <CommentCard :comment="comment" :postId="post.id" />
       </div>
 
       <div class="p-4">
@@ -122,7 +96,6 @@ const handleDeletePost = async () => {
             />
           </Field>
           <ErrorMessage name="comment" class="text-red-500 text-sm mt-1" />
-
           <div class="flex justify-end mt-2">
             <button
               type="submit"
