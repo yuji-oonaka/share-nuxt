@@ -150,7 +150,7 @@ npm run dev
 ```
 
 ブラウザで [http://localhost:3000/register](http://localhost:3000/register) を開き、アカウントを新規登録してください。
-これで初回の環境構築は完了です。 🎉
+これで初回の環境構築は完了です。
 
 [▲ 目次に戻る](#目次)
 
