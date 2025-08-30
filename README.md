@@ -164,7 +164,7 @@ npm run dev
 
 ```bash
 cd backend
-sail up -d
+./vendor/bin/sail up -d
 ```
 
 * **フロントエンドサーバー**
@@ -184,7 +184,7 @@ npm run dev
 
 ```bash
 cd backend
-sail artisan test
+./vendor/bin/sail artisan test
 ```
 
 ### フロントエンドテスト (Vitest)
