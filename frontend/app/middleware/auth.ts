@@ -1,22 +1,19 @@
-export default defineNuxtRouteMiddleware((to, from) => {
+export default defineNuxtRouteMiddleware((to) => {
   const userStore = useUserStore();
 
-  // 未ログイン状態で、ログイン/登録ページ以外にアクセスしようとした場合
-  if (
-    !userStore.isLoggedIn &&
-    to.path !== "/login" &&
-    to.path !== "/register"
-  ) {
-    // ログインページへ強制的にリダイレクト
+  // SSR 時は何もしない
+  if (process.server) return;
+
+  // 認証状態がまだ確定していなければ何もせず待つ
+  if (!userStore.isAuthReady) return;
+
+  // 未ログインでアクセスしてはいけないページ
+  if (!userStore.isLoggedIn && !["/login", "/register"].includes(to.path)) {
     return navigateTo("/login");
   }
 
-  // ログイン済み状態で、ログイン/登録ページにアクセスしようとした場合
-  if (
-    userStore.isLoggedIn &&
-    (to.path === "/login" || to.path === "/register")
-  ) {
-    // ホームページへ強制的にリダイレクト
+  // ログイン済みでアクセスできないページ
+  if (userStore.isLoggedIn && ["/login", "/register"].includes(to.path)) {
     return navigateTo("/");
   }
 });
