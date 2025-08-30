@@ -97,24 +97,28 @@ export const usePostsStore = defineStore("posts", {
       if (!content.trim()) return;
       const toast = useToast();
       try {
-        // APIへの送信は変更なし
-        await useApiFetch(`/posts/${postId}/comments`, {
+        // 1. コメントをサーバーに送信
+        const newComment = await useApiFetch(`/posts/${postId}/comments`, {
           method: "POST",
           body: { content },
         });
         toast.success("コメントしました");
 
-        // データを更新
-        const updatedPost = await useApiFetch<Post>(`/posts/${postId}`);
+        // 2. 即時反映（ローカル更新）
         const index = this.posts.findIndex((p) => p.id === postId);
+        if (index !== -1) {
+          const targetPost = this.posts[index];
+          targetPost.comments = [...(targetPost.comments || []), newComment];
+          targetPost.comments_count = (targetPost.comments_count || 0) + 1;
+        }
+
+        // 3. サーバーから最新の投稿データを再取得して整合性を取る（任意）
+        const updatedPost = await useApiFetch<Post>(`/posts/${postId}`);
         if (updatedPost && index !== -1) {
-          // ▼▼▼ ここを修正 ▼▼▼
-          const existingPost = this.posts[index];
-          this.posts[index] = {
-            ...existingPost, // 既存のデータ（いいね情報など）を保持
-            ...updatedPost, // サーバーからの最新データ（新しいコメントなど）で上書き
-          };
-          // ▲▲▲ ここまで修正 ▲▲▲
+          this.posts.splice(index, 1, {
+            ...this.posts[index],
+            ...updatedPost,
+          });
         }
       } catch (error) {
         console.error("コメントの投稿に失敗しました", error);
