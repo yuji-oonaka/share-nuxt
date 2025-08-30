@@ -71,12 +71,17 @@ share-nuxt/
 
 ## 環境構築
 
-### 前提条件
+### 動作環境
 
-- Git
-- Docker Desktop
-- Node.js (v18以上推奨)
-- Firebaseアカウント
+| 項目                          | バージョン / 補足                                        |
+| :-------------------------- | :------------------------------------------------ |
+| **Node.js / npm**           | Node.js v22.18.0 / npm v10.9.3                    |
+| **Docker / Docker Compose** | Docker v28.3.3 / Docker Compose v2.39.2-desktop.1 |
+| **PHP (Laravel Sail)**      | PHP 8.3 コンテナ内                                     |
+| **MySQL (Sailコンテナ)**        | MySQL 8.0                                         |
+| **Firebaseアカウント**           | Webアプリ用 API キーを使用                                 |
+
+> 上記環境で `setup.sh` を実行し、フロントエンド・バックエンドともに動作確認済みです。
 
 ### 実行手順
 
@@ -104,6 +109,21 @@ cd share-nuxt
 chmod +x setup.sh
 ./setup.sh
 ```
+
+#### `setup.sh` が行う処理
+
+* **バックエンド（Laravel）**
+
+  * `.env.example` をコピーして `.env` を作成
+  * Composer パッケージのインストール
+  * Sail コンテナのビルド＆起動
+  * アプリケーションキーの生成
+  * DBマイグレーション実行 & シーディング
+
+* **フロントエンド（Nuxt.js）**
+
+  * npm パッケージのインストール
+  * `.env.example` をコピーして `.env` を作成
 
 ***
 
@@ -179,13 +199,18 @@ npm test
 
 <img width="661" height="571" alt="share drawio" src="https://github.com/user-attachments/assets/1ff205f0-5729-4193-98f6-c1db04039c28" />
 
-
 | テーブル名 | 概要 |
 |:-----------|:-----|
 | **users**  | ユーザー情報（FirebaseのUIDを含む） |
 | **posts**  | 投稿内容 |
 | **comments** | 投稿へのコメント |
 | **likes**    | 投稿への「いいね」 |
+
+- users 1 --- n posts
+
+- posts 1 --- n comments
+
+- users n --- n posts （likes中間テーブル）
 
 [▲ 目次に戻る](#目次)
 
