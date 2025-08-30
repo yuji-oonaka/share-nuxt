@@ -27,13 +27,13 @@ const fetchPost = async () => {
     const index = postsStore.posts.findIndex(p => p.id === postId);
     if (index !== -1) {
       const existing = postsStore.posts[index];
-      postsStore.posts[index] = {
+      postsStore.posts.splice(index, 1, {
         ...fetchedPost,
         likes: existing.likes ?? fetchedPost.likes,
         likes_count: existing.likes_count ?? fetchedPost.likes_count,
         comments: existing.comments ?? fetchedPost.comments,
         comments_count: existing.comments_count ?? fetchedPost.comments_count,
-      };
+      });
     } else {
       postsStore.posts.push(fetchedPost);
     }
