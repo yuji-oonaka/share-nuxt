@@ -60,7 +60,6 @@ share-nuxt/
 │   ├── public/           # 画像などの静的ファイル
 │   └── .env.example      # フロントエンド設定のテンプレート
 │
-├── .gitignore
 ├── README.md
 └── setup.sh              # 自動環境構築スクリプト
 ```
