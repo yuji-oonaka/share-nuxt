@@ -26,14 +26,16 @@ echo "sailコンテナをビルドして起動します..."
 ./vendor/bin/sail up -d --build
 
 echo "データベースコンテナの起動を待っています..."
-# mysqladmin pingコマンドが成功するまでループする
-# -h mysql はdocker-compose.ymlのサービス名を指定
-# --silent でエラーメッセージを非表示にする
-while ! ./vendor/bin/sail mysqladmin ping -h mysql --silent; do
-    # 1秒待機してからリトライ
+timeout=60
+count=0
+until ./vendor/bin/sail exec mysql mysqladmin ping --silent; do
     sleep 1
+    count=$((count+1))
+    if [ $count -ge $timeout ]; then
+        echo "❌ データベースが起動しませんでした。"
+        exit 1
+    fi
 done
-
 echo "✅ データベースの準備が完了しました。"
 
 echo "アプリケーションキーを生成します..."
