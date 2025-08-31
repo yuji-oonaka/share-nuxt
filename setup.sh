@@ -25,8 +25,16 @@ docker run --rm \
 echo "sailコンテナをビルドして起動します..."
 ./vendor/bin/sail up -d --build
 
-echo "データベースコンテナの起動を待ちます..."
-sleep 15 # 15秒待機
+echo "データベースコンテナの起動を待っています..."
+# mysqladmin pingコマンドが成功するまでループする
+# -h mysql はdocker-compose.ymlのサービス名を指定
+# --silent でエラーメッセージを非表示にする
+while ! ./vendor/bin/sail mysqladmin ping -h mysql --silent; do
+    # 1秒待機してからリトライ
+    sleep 1
+done
+
+echo "✅ データベースの準備が完了しました。"
 
 echo "アプリケーションキーを生成します..."
 ./vendor/bin/sail artisan key:generate
@@ -37,8 +45,7 @@ echo "データベースを構築し、シーディングを実行します..."
 
 echo "--- バックエンドの構築が完了しました。 ---"
 
-
-# --- フロントエンドの構築 (Nuxt.js用に修正) ---
+# --- フロントエンドの構築 ---
 echo "--- 2. フロントエンド (Nuxt.js) を構築中... ---"
 cd ../frontend
 
@@ -48,13 +55,12 @@ npm install
 echo ".envファイルを作成します..."
 # .env.exampleが存在する場合のみコピーする
 if [ -f .env.example ]; then
-    cp .env.example .env # .env.local から .env に変更
+    cp .env.example .env
 fi
 
 echo "--- フロントエンドの構築が完了しました。 ---"
 
 echo "✅ 全ての環境構築が完了しました！"
 echo "--- 次のステップ ---"
-# .env.local から .env に変更
 echo "1. backend/.env と frontend/.env に、Firebaseのキーなどを設定してください。"
 echo "2. frontendディレクトリで 'npm run dev' を実行して、開発を開始してください。"
