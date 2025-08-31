@@ -132,13 +132,38 @@ chmod +x setup.sh
 #### ステップ4：環境変数の設定
 
 * **バックエンド (`backend/.env`)**
-  環境変数（`COMPOSE_PROJECT_NAME`, `APP_NAME`, `FIREBASE_PROJECT_ID`など）を設定
-  サービスアカウントの秘密鍵は `firebase_credentials.json` にリネームし、`backend/storage/app/` に配置
 
-* **フロントエンド (`frontend/.env`)**
-  Firebase Webアプリ用のAPIキー（`NUXT_PUBLIC_...`）を設定
+   `.env` を編集してください。  
+
+  必須:
+  - `FIREBASE_PROJECT_ID` = Firebase プロジェクトのID  
+  - Firebase コンソールから取得したサービスアカウント秘密鍵を  
+    `firebase_credentials.json` にリネームし、`backend/storage/app/` に配置  
+    （`.env` の `FIREBASE_CREDENTIALS=storage/app/firebase_credentials.json` と一致させる）
+
+  任意（必要に応じて変更）:
+  - `COMPOSE_PROJECT_NAME` = Docker Compose プロジェクト名（デフォルト: share-nuxt）  
+  - `APP_NAME` = アプリ名（ログや通知で利用）  
+  - その他の DB・Redis・メール設定は `.env.example` のままでローカル動作可  
 
 ---
+
+* **フロントエンド (`frontend/.env`)**
+
+  `.env` を編集してください。  
+
+  必須（Firebase Web アプリの設定値を入力）:
+  - `NUXT_PUBLIC_FIREBASE_API_KEY`  
+  - `NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN`  
+  - `NUXT_PUBLIC_FIREBASE_PROJECT_ID`  
+  - `NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET`  
+  - `NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`  
+  - `NUXT_PUBLIC_FIREBASE_APP_ID`  
+
+  必須（バックエンドAPIとの接続用）:
+  - `NUXT_PUBLIC_API_BASE_URL="http://localhost/api"`
+
+- Firebase の値は Firebase コンソールの「プロジェクト設定 > 全般 > Firebase SDK snippet (構成)」からコピーできます。
 
 #### ステップ5：開発の開始
 
