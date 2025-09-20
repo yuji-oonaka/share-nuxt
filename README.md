@@ -2,6 +2,10 @@
 
 # SHARE (Nuxt.js版) - ソーシャルメディア風アプリケーション
 
+<img width="1904" height="908" alt="スクリーンショット 2025-09-16 111357" src="https://github.com/user-attachments/assets/6d845f75-4c85-4c22-b442-e3ec8ca78bab" />
+
+<img width="1910" height="911" alt="スクリーンショット 2025-09-16 111442" src="https://github.com/user-attachments/assets/97b0fa4a-043d-4332-bf7c-57935cff1e3d" />
+
 短いメッセージを投稿・共有できる、シンプルなSNS風アプリケーションです。
 **学習目的**として、フロントエンド（Nuxt.js）とバックエンド（Laravel API）の統合開発を行い、
 ユーザー認証には Firebase Authentication を採用しています。
